@@ -41,7 +41,6 @@ void MainWindow::on_open_CSV_from_QGIS_clicked()
     }
 }
 
-
 void MainWindow::on_modify_mff_from_Fracman_clicked()
 {
     QFile oldMff, newMff;
@@ -49,85 +48,111 @@ void MainWindow::on_modify_mff_from_Fracman_clicked()
     QString oneLine;
     int gridNodeStartNum, nodeNum;
     bool findingStartNum = true;
+    int st = -1;
 
-    openOldMffFile( &oldMff, &newMff);
-    QTextStream oldMffStream( &oldMff);
-    qint64 posHead = oldMff.pos();
-    QTextStream newMffStream( &newMff);
-
-    while( !oldMffStream.atEnd() && findingStartNum)
+    st = openOldMffFile( &oldMff, &newMff, "mff");
+    if (st == 0)
     {
-        oneLine = oldMffStream.readLine();
+        createNewMffFile( &newMff, oldMff.fileName());
 
-        if (oneLine.contains("MatrixElem"))
+        QTextStream oldMffStream( &oldMff);
+        qint64 posHead = oldMff.pos();
+        QTextStream newMffStream( &newMff);
+
+        //finding start nodes number of grid
+        while( !oldMffStream.atEnd() && findingStartNum)
         {
-            QSL_oneLine = oldMffStream.readLine().simplified().split(" ");
-            gridNodeStartNum = QSL_oneLine[2].toInt();
+            oneLine = oldMffStream.readLine();
 
-            findingStartNum = false;
-        }
-    }
-
-    oldMffStream.seek(posHead);
-    while (!oldMffStream.atEnd())
-    {
-        oneLine = oldMffStream.readLine();
-        newMffStream << oneLine << endl;
-
-        if (oneLine.contains("*** HEADER"))
-        {
-            for (nodeNum = 0; nodeNum < gridNodeStartNum; nodeNum++)
-            {
-                oneLine = oldMffStream.readLine();
-                newMffStream << oneLine << endl;
-            }
-            for (int i=0; i < nodeList.count(); i++)
+            if (oneLine.contains("MatrixElem"))
             {
                 QSL_oneLine = oldMffStream.readLine().simplified().split(" ");
-                QSL_oneLine[4] = nodeList[i]->getType();
-                QSL_oneLine[5] = nodeList[i]->getH();
-                QSL_oneLine[6] = nodeList[i]->getQ();
-                QSL_oneLine[7] = nodeList[i]->getGrp();
-                oneLine = "";
-                for (int j=0; j<QSL_oneLine.count(); j++)
-                {
-                    oneLine = oneLine + '\t' + QSL_oneLine[j];
-                }
-                newMffStream << oneLine << endl;
+                gridNodeStartNum = QSL_oneLine[2].toInt();
+
+                findingStartNum = false;
             }
         }
+
+        oldMffStream.seek(posHead);
+        while (!oldMffStream.atEnd())
+        {
+            oneLine = oldMffStream.readLine();
+            newMffStream << oneLine << endl;
+
+            if (oneLine.contains("*** HEADER"))
+            {
+                for (nodeNum = 0; nodeNum < gridNodeStartNum; nodeNum++)
+                {
+                    oneLine = oldMffStream.readLine();
+                    newMffStream << oneLine << endl;
+                }
+                for (int i=0; i < nodeList.count(); i++)
+                {
+                    QSL_oneLine = oldMffStream.readLine().simplified().split(" ");
+                    QSL_oneLine[4] = nodeList[i]->getType();
+                    QSL_oneLine[5] = nodeList[i]->getH();
+                    QSL_oneLine[6] = nodeList[i]->getQ();
+                    QSL_oneLine[7] = nodeList[i]->getGrp();
+                    oneLine = "";
+                    for (int j=0; j<QSL_oneLine.count(); j++)
+                    {
+                        oneLine = oneLine + '\t' + QSL_oneLine[j];
+                    }
+                    newMffStream << oneLine << endl;
+                }
+            }
+        }
+        renameMffFile( &oldMff, &newMff);
     }
-    renameMffFile( &oldMff, &newMff);
 }
 
-void MainWindow::openOldMffFile( QFile* oldMff, QFile* newMff)
+int MainWindow::openOldMffFile( QFile* oldMff, QFile* newMff, QString fileType)
 {
-    QString filePath = QFileDialog::getOpenFileName(
-                this,
-                tr("Select a mff file from Fracman"),
-                "",
-                "mff Files (*.mff)");
-    if (!filePath.isNull())
-    {
-        oldMff->setFileName( filePath);
-        oldMff->open( QFile::ReadOnly|QFile::Text);
-
-        createNewMffFile( newMff, oldMff->fileName());
-    }
+    return openOldFile( oldMff, newMff, fileType);
 }
 
 void MainWindow::createNewMffFile( QFile* newMff, QString fileName)
 {
-    fileName.remove( fileName.length()-3, 3);
-    fileName = fileName + "new";
-    newMff->setFileName( fileName);
-    newMff->open( QFile::WriteOnly|QFile::Text);
+    createNewFile( newMff, fileName);
 }
 
 void MainWindow::renameMffFile( QFile* oldMff, QFile* newMff)
 {
-    QString fileName = oldMff->fileName();
-    fileName.remove( fileName.length()-3, 3);
-    oldMff->rename( fileName + "old");
-    newMff->rename( fileName + "mff");
+    renameFile( oldMff, newMff);
 }
+
+int MainWindow::openOldFile(QFile *oldFile, QFile *newFile, QString fileType)
+{
+    QString filePath = QFileDialog::getOpenFileName(
+                this,
+                tr("Select a file"),
+                "",
+                "mff Files (*.mff)");
+    if (!filePath.isNull())
+    {
+        oldFile->setFileName( filePath);
+        oldFile->open( QFile::ReadOnly|QFile::Text);
+
+        return 0;
+    }
+    return -1;
+}
+
+void MainWindow::createNewFile(QFile *newFile, QString fileName)
+{
+    fileName.remove( fileName.length()-3, 3);
+    fileName = fileName + "new";
+    newFile->setFileName( fileName);
+    newFile->open( QFile::WriteOnly|QFile::Text);
+
+}
+
+void MainWindow::renameFile(QFile *oldFile, QFile *newFile)
+{
+    QString fileName = oldFile->fileName();
+    fileName.remove( fileName.length()-3, 3);
+    oldFile->rename( fileName + "old");
+    newFile->rename( fileName + "mff");
+
+}
+

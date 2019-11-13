@@ -20,9 +20,12 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void openOldMffFile( QFile*, QFile*);
+    int openOldMffFile( QFile*, QFile*, QString);
     void createNewMffFile( QFile*, QString);
     void renameMffFile( QFile*, QFile*);
+    int openOldFile( QFile*, QFile*, QString);
+    void createNewFile( QFile*, QString);
+    void renameFile( QFile*, QFile*);
 
 private slots:
     void on_open_CSV_from_QGIS_clicked();
