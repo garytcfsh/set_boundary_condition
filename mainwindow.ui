@@ -6,52 +6,58 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>331</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="open_CSV_from_QGIS">
+   <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>320</y>
-      <width>131</width>
-      <height>23</height>
+      <x>10</x>
+      <y>90</y>
+      <width>311</width>
+      <height>80</height>
      </rect>
     </property>
-    <property name="text">
-     <string>open CSV from QGIS</string>
-    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QPushButton" name="generate_QGIS_import_file">
+       <property name="text">
+        <string>generate QGIS import file</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
-   <widget class="QPushButton" name="modify_mff_from_Fracman">
+   <widget class="QWidget" name="verticalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>320</y>
-      <width>151</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>modify mff from Fracman</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="generate_QGIS_import_file">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
+      <x>10</x>
       <y>260</y>
-      <width>131</width>
-      <height>23</height>
+      <width>311</width>
+      <height>80</height>
      </rect>
     </property>
-    <property name="text">
-     <string>generate QGIS import file</string>
-    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QPushButton" name="open_CSV_from_QGIS">
+       <property name="text">
+        <string>open CSV from QGIS</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="modify_mff_from_Fracman">
+       <property name="text">
+        <string>modify mff from Fracman</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -59,7 +65,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>331</width>
      <height>21</height>
     </rect>
    </property>

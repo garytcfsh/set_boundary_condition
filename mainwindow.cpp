@@ -68,6 +68,14 @@ void MainWindow::on_modify_mff_from_Fracman_clicked()
         renameMffFile( &oldMff, &newMff);
         oldMff.close();
         newMff.close();
+
+        msg.setText("The new mff file is created");
+        msg.exec();
+    }
+    else
+    {
+        msg.setText("error when opening file");
+        msg.exec();
     }
 }
 
@@ -196,6 +204,16 @@ void MainWindow::on_generate_QGIS_import_file_clicked()
 
         searchGridNodeNum( &oldMffStream, &oldMff);
         wrightQGISImportFile( &oldMffStream, &newMffStream);
+        oldMff.close();
+        newMff.close();
+
+        msg.setText("The QGIS import file is created");
+        msg.exec();
+    }
+    else
+    {
+        msg.setText("error when opening file");
+        msg.exec();
     }
 }
 

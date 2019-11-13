@@ -6,7 +6,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QTextStream>
-#include <QDebug>
+#include <QMessageBox>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -44,5 +44,6 @@ private:
 
     QList <Nodes*> nodeList;
     int gridNodeStartNum;
+    QMessageBox msg;
 };
 #endif // MAINWINDOW_H
