@@ -16,38 +16,43 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_open_CSV_from_QGIS_clicked()
 {
-    QString filePath = QFileDialog::getOpenFileName(
-                this,
-                tr("Select a CSV file from QGIS"),
-                "",
-                "csv Files (*.csv)");
-    if (!filePath.isNull())
+    QFile csvFromQGIS;
+    int st = -1;
+    st = openCSVFile( &csvFromQGIS, "csv");
+
+    if (st == 0)
     {
-        QFile csvFromQGIS (filePath);
-        csvFromQGIS.open (QFile::ReadOnly|QFile::Text);
-        QTextStream csvFromQGISStream (&csvFromQGIS);
+        saveCSVasNodeList( &csvFromQGIS);
 
-        csvFromQGISStream.readLine();
-
-        while (!csvFromQGISStream.atEnd())
-        {
-            QStringList oneLine;
-            oneLine = csvFromQGISStream.readLine().split(",");
-            nodeList.append (new Nodes (oneLine[0], oneLine[1], oneLine[2],
-                    oneLine[3], oneLine[4], oneLine[5], oneLine[6], oneLine[7]));
-
-        }
         csvFromQGIS.close();
     }
+}
+
+void MainWindow::saveCSVasNodeList( QFile *csvFromQGIS)
+{
+
+    QTextStream csvFromQGISStream (csvFromQGIS);
+    csvFromQGISStream.readLine();
+
+    while (!csvFromQGISStream.atEnd())
+    {
+        QStringList oneLine;
+        oneLine = csvFromQGISStream.readLine().split(",");
+        nodeList.append (new Nodes (oneLine[0], oneLine[1], oneLine[2],
+                oneLine[3], oneLine[4], oneLine[5], oneLine[6], oneLine[7]));
+
+    }
+}
+
+int MainWindow::openCSVFile(QFile *file, QString fileType)
+{
+    return openFile( file, fileType);
 }
 
 void MainWindow::on_modify_mff_from_Fracman_clicked()
 {
     QFile oldMff, newMff;
-    QStringList QSL_oneLine;
-    QString oneLine;
-    int gridNodeStartNum, nodeNum;
-    bool findingStartNum = true;
+    int gridNodeStartNum;
     int st = -1;
 
     st = openMffFile( &oldMff, "mff");
@@ -56,54 +61,74 @@ void MainWindow::on_modify_mff_from_Fracman_clicked()
         createNewMffFile( &newMff, oldMff.fileName());
 
         QTextStream oldMffStream( &oldMff);
-        qint64 posHead = oldMff.pos();
         QTextStream newMffStream( &newMff);
-
-        //finding start nodes number of grid
-        while( !oldMffStream.atEnd() && findingStartNum)
-        {
-            oneLine = oldMffStream.readLine();
-
-            if (oneLine.contains("MatrixElem"))
-            {
-                QSL_oneLine = oldMffStream.readLine().simplified().split(" ");
-                gridNodeStartNum = QSL_oneLine[2].toInt();
-
-                findingStartNum = false;
-            }
-        }
-
-        oldMffStream.seek(posHead);
-        while (!oldMffStream.atEnd())
-        {
-            oneLine = oldMffStream.readLine();
-            newMffStream << oneLine << endl;
-
-            if (oneLine.contains("*** HEADER"))
-            {
-                for (nodeNum = 0; nodeNum < gridNodeStartNum; nodeNum++)
-                {
-                    oneLine = oldMffStream.readLine();
-                    newMffStream << oneLine << endl;
-                }
-                for (int i=0; i < nodeList.count(); i++)
-                {
-                    QSL_oneLine = oldMffStream.readLine().simplified().split(" ");
-                    QSL_oneLine[4] = nodeList[i]->getType();
-                    QSL_oneLine[5] = nodeList[i]->getH();
-                    QSL_oneLine[6] = nodeList[i]->getQ();
-                    QSL_oneLine[7] = nodeList[i]->getGrp();
-                    oneLine = "";
-                    for (int j=0; j<QSL_oneLine.count(); j++)
-                    {
-                        oneLine = oneLine + '\t' + QSL_oneLine[j];
-                    }
-                    newMffStream << oneLine << endl;
-                }
-            }
-        }
+        searchGridNodeNum( &oldMffStream, &oldMff, &gridNodeStartNum);
+        wrightNewMffFile( &oldMffStream, &newMffStream, gridNodeStartNum);
         renameMffFile( &oldMff, &newMff);
+        oldMff.close();
+        newMff.close();
     }
+}
+
+void MainWindow::searchGridNodeNum(QTextStream *oldMffStream, QFile *oldMff, int *gridNodeStartNum)
+{
+    QStringList QSL_oneLine;
+    QString oneLine;
+    bool findingStartNum = true;
+
+    qint64 posHead = oldMff->pos();
+
+    while( !oldMffStream->atEnd() && findingStartNum)
+    {
+        oneLine = oldMffStream->readLine();
+
+        if (oneLine.contains("MatrixElem"))
+        {
+            QSL_oneLine = oldMffStream->readLine().simplified().split(" ");
+            *gridNodeStartNum = QSL_oneLine[2].toInt();
+
+            findingStartNum = false;
+        }
+    }
+
+    oldMffStream->seek(posHead);
+}
+
+void MainWindow::wrightNewMffFile( QTextStream *oldMffStream, QTextStream *newMffStream, int gridNodeStartNum)
+{
+    QStringList QSL_oneLine;
+    QString oneLine;
+    int nodeNum;
+
+    while (!oldMffStream->atEnd())
+    {
+        oneLine = oldMffStream->readLine();
+        *newMffStream << oneLine << endl;
+
+        if (oneLine.contains("*** HEADER"))
+        {
+            for (nodeNum = 0; nodeNum < gridNodeStartNum; nodeNum++)
+            {
+                oneLine = oldMffStream->readLine();
+                *newMffStream << oneLine << endl;
+            }
+            for (int i=0; i < nodeList.count(); i++)
+            {
+                QSL_oneLine = oldMffStream->readLine().simplified().split(" ");
+                QSL_oneLine[4] = nodeList[i]->getType();
+                QSL_oneLine[5] = nodeList[i]->getH();
+                QSL_oneLine[6] = nodeList[i]->getQ();
+                QSL_oneLine[7] = nodeList[i]->getGrp();
+                oneLine = "";
+                for (int j=0; j<QSL_oneLine.count(); j++)
+                {
+                    oneLine = oneLine + '\t' + QSL_oneLine[j];
+                }
+                *newMffStream << oneLine << endl;
+            }
+        }
+    }
+
 }
 
 int MainWindow::openMffFile( QFile* oldMff, QString fileType)

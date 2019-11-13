@@ -20,12 +20,16 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    int openCSVFile( QFile*, QString);
     int openMffFile( QFile*, QString);
     void createNewMffFile( QFile*, QString);
     void renameMffFile( QFile*, QFile*);
     int openFile( QFile*, QString);
     void createNewFile( QFile*, QString);
     void renameFile( QFile*, QFile*);
+    void saveCSVasNodeList( QFile*);
+    void searchGridNodeNum( QTextStream*, QFile*, int*);
+    void wrightNewMffFile( QTextStream*, QTextStream*, int);
 
 private slots:
     void on_open_CSV_from_QGIS_clicked();
