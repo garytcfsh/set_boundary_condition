@@ -28,17 +28,21 @@ public:
     void createNewFile( QFile*, QString);
     void renameFile( QFile*, QFile*);
     void saveCSVasNodeList( QFile*);
-    void searchGridNodeNum( QTextStream*, QFile*, int*);
-    void wrightNewMffFile( QTextStream*, QTextStream*, int);
+    void searchGridNodeNum( QTextStream*, QFile*);
+    void wrightNewMffFile( QTextStream*, QTextStream*);
+    void wrightQGISImportFile( QTextStream*, QTextStream*);
 
 private slots:
     void on_open_CSV_from_QGIS_clicked();
 
     void on_modify_mff_from_Fracman_clicked();
 
+    void on_generate_QGIS_import_file_clicked();
+
 private:
     Ui::MainWindow *ui;
 
     QList <Nodes*> nodeList;
+    int gridNodeStartNum;
 };
 #endif // MAINWINDOW_H

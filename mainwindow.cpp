@@ -52,25 +52,26 @@ int MainWindow::openCSVFile(QFile *file, QString fileType)
 void MainWindow::on_modify_mff_from_Fracman_clicked()
 {
     QFile oldMff, newMff;
-    int gridNodeStartNum;
     int st = -1;
 
     st = openMffFile( &oldMff, "mff");
     if (st == 0)
     {
-        createNewMffFile( &newMff, oldMff.fileName());
-
+        QString fileName = oldMff.fileName();
+        fileName.remove( fileName.length()-3, 3);
+        fileName = fileName + "new";
+        createNewMffFile( &newMff, fileName);
         QTextStream oldMffStream( &oldMff);
         QTextStream newMffStream( &newMff);
-        searchGridNodeNum( &oldMffStream, &oldMff, &gridNodeStartNum);
-        wrightNewMffFile( &oldMffStream, &newMffStream, gridNodeStartNum);
+        searchGridNodeNum( &oldMffStream, &oldMff);
+        wrightNewMffFile( &oldMffStream, &newMffStream);
         renameMffFile( &oldMff, &newMff);
         oldMff.close();
         newMff.close();
     }
 }
 
-void MainWindow::searchGridNodeNum(QTextStream *oldMffStream, QFile *oldMff, int *gridNodeStartNum)
+void MainWindow::searchGridNodeNum(QTextStream *oldMffStream, QFile *oldMff)
 {
     QStringList QSL_oneLine;
     QString oneLine;
@@ -85,7 +86,7 @@ void MainWindow::searchGridNodeNum(QTextStream *oldMffStream, QFile *oldMff, int
         if (oneLine.contains("MatrixElem"))
         {
             QSL_oneLine = oldMffStream->readLine().simplified().split(" ");
-            *gridNodeStartNum = QSL_oneLine[2].toInt();
+            gridNodeStartNum = QSL_oneLine[2].toInt();
 
             findingStartNum = false;
         }
@@ -94,7 +95,7 @@ void MainWindow::searchGridNodeNum(QTextStream *oldMffStream, QFile *oldMff, int
     oldMffStream->seek(posHead);
 }
 
-void MainWindow::wrightNewMffFile( QTextStream *oldMffStream, QTextStream *newMffStream, int gridNodeStartNum)
+void MainWindow::wrightNewMffFile( QTextStream *oldMffStream, QTextStream *newMffStream)
 {
     QStringList QSL_oneLine;
     QString oneLine;
@@ -165,11 +166,8 @@ int MainWindow::openFile(QFile *file,  QString fileType)
 
 void MainWindow::createNewFile(QFile *newFile, QString fileName)
 {
-    fileName.remove( fileName.length()-3, 3);
-    fileName = fileName + "new";
     newFile->setFileName( fileName);
     newFile->open( QFile::WriteOnly|QFile::Text);
-
 }
 
 void MainWindow::renameFile(QFile *oldFile, QFile *newFile)
@@ -178,6 +176,60 @@ void MainWindow::renameFile(QFile *oldFile, QFile *newFile)
     fileName.remove( fileName.length()-3, 3);
     oldFile->rename( fileName + "old");
     newFile->rename( fileName + "mff");
-
 }
 
+
+void MainWindow::on_generate_QGIS_import_file_clicked()
+{
+    QFile oldMff, newMff;
+    int st = -1;
+
+    st = openMffFile( &oldMff, "mff");
+    if (st == 0)
+    {
+        QString fileName = oldMff.fileName();
+        fileName.remove( fileName.length()-4, 4);
+        fileName = fileName + "_grid.csv";
+        createNewFile( &newMff, fileName);
+        QTextStream oldMffStream( &oldMff);
+        QTextStream newMffStream( &newMff);
+
+        searchGridNodeNum( &oldMffStream, &oldMff);
+        wrightQGISImportFile( &oldMffStream, &newMffStream);
+    }
+}
+
+void MainWindow::wrightQGISImportFile( QTextStream *oldMffStream, QTextStream *newMffStream)
+{
+    QStringList QSL_oneLine;
+    QString oneLine;
+    int nodeNum;
+    bool nodeEnd = false;
+
+    while (!oldMffStream->atEnd())
+    {
+        oneLine = oldMffStream->readLine();
+
+        if (oneLine.contains("*** HEADER"))
+        {
+            for (nodeNum = 0; nodeNum < gridNodeStartNum; nodeNum++)
+            {
+                oneLine = oldMffStream->readLine();
+            }
+            while (!nodeEnd)
+            {
+                QSL_oneLine = oldMffStream->readLine().simplified().split(" ");
+                if (QSL_oneLine[0] == "0")
+                {
+                    nodeEnd = true;
+                }
+                else
+                {
+                    oneLine = QSL_oneLine.join(",");
+                    *newMffStream << oneLine << endl;
+                }
+            }
+        }
+    }
+
+}
