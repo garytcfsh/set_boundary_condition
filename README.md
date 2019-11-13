@@ -18,13 +18,14 @@
            *field_8 means boundary group.*  
   *Click OK -> Save Layer Edits -> Toggle Editing.*
 7. In QGIS, save the gpkg layer as the new csv file by "Right clicking the gpkg layer->Export->Save Features As...".
-8. In QGIS | Save Vector Layer as..., select Comma Separated Value [CSV] as file format in "Format". **NOTICE: Let "fid" in "Select fields to export and ..." unselect** befor clicking "OK".
+8. In QGIS | Save Vector Layer as..., select Comma Separated Value [CSV] as file format in "Format".  
+**NOTICE: Let "fid" in "Select fields to export and ..." unselect** befor clicking "OK".
 
 
-
-## Step2: Modify the mff file
 ----
-* If you change fractures number, you do not need to redo step 1 but step 2.
+## Step2: Modify the mff file
+
+* (If you change fractures number, you do not need to redo step 1 but step 2.)
 1. Click "open CSV from QGIS" button and select a csv file which was generated in step 1-8.
 2. Click "modify mff from Fracman" button and select the mff file which was created by Fracman.  
   *This step will generate a modified mff file which is named ".mff", and the old one will rename as ".old".*
