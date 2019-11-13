@@ -50,7 +50,7 @@ void MainWindow::on_modify_mff_from_Fracman_clicked()
     bool findingStartNum = true;
     int st = -1;
 
-    st = openOldMffFile( &oldMff, &newMff, "mff");
+    st = openMffFile( &oldMff, "mff");
     if (st == 0)
     {
         createNewMffFile( &newMff, oldMff.fileName());
@@ -106,9 +106,9 @@ void MainWindow::on_modify_mff_from_Fracman_clicked()
     }
 }
 
-int MainWindow::openOldMffFile( QFile* oldMff, QFile* newMff, QString fileType)
+int MainWindow::openMffFile( QFile* oldMff, QString fileType)
 {
-    return openOldFile( oldMff, newMff, fileType);
+    return openFile( oldMff, fileType);
 }
 
 void MainWindow::createNewMffFile( QFile* newMff, QString fileName)
@@ -121,17 +121,17 @@ void MainWindow::renameMffFile( QFile* oldMff, QFile* newMff)
     renameFile( oldMff, newMff);
 }
 
-int MainWindow::openOldFile(QFile *oldFile, QFile *newFile, QString fileType)
+int MainWindow::openFile(QFile *file,  QString fileType)
 {
     QString filePath = QFileDialog::getOpenFileName(
                 this,
                 tr("Select a file"),
                 "",
-                "mff Files (*.mff)");
+                fileType + " Files (*." + fileType + ")");
     if (!filePath.isNull())
     {
-        oldFile->setFileName( filePath);
-        oldFile->open( QFile::ReadOnly|QFile::Text);
+        file->setFileName( filePath);
+        file->open( QFile::ReadOnly|QFile::Text);
 
         return 0;
     }

@@ -20,10 +20,10 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    int openOldMffFile( QFile*, QFile*, QString);
+    int openMffFile( QFile*, QString);
     void createNewMffFile( QFile*, QString);
     void renameMffFile( QFile*, QFile*);
-    int openOldFile( QFile*, QFile*, QString);
+    int openFile( QFile*, QString);
     void createNewFile( QFile*, QString);
     void renameFile( QFile*, QFile*);
 
